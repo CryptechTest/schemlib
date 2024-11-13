@@ -107,6 +107,8 @@ function schemlib.serialize_json(head, flags, pos1, pos2)
     local result, count = schemlib.serialize(pos1, pos2)
     -- Serialize entries
     local json_result = minetest.write_json(result)
+    head.size = schemlib.size(pos1, pos2)
+    head.volume = schemlib.volume(pos1, pos2)
     local json_header = schemlib.get_serialized_header(head, count)
     local json_flags = schemlib.get_serialized_flags(flags)
     local json_str = schemlib.format_result_json(json_header, json_flags, json_result)
