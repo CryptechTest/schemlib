@@ -236,14 +236,17 @@ function schemlib.clear_selection(player)
     minetest.chat_send_player(name, "Selection cleared")
 end
 
---- Loads the nodes represented by string `value` at position `origin_pos`.
+--- Loads the nodes represented by string `json_obj` at position `origin_pos`.
 -- @return The number of nodes deserialized.
-function schemlib.process_emitted(origin_pos, value, obj, emerge)
-    -- minetest.log(">>> Loading Emitted...")
-    if obj == nil then
-        obj = load_json_schematic(value)
+function schemlib.process_emitted(origin_pos, obj_json, obj_table, emerge_cb)
+    if obj_json == nil and obj_table == nil then
+        return nil
     end
-    local nodes = obj.cuboid
+    -- minetest.log(">>> Loading Emitted...")
+    if obj_table == nil then
+        obj_table = load_json_schematic(obj_json)
+    end
+    local nodes = obj_table.cuboid
     if not nodes then
         return nil
     end
@@ -252,36 +255,42 @@ function schemlib.process_emitted(origin_pos, value, obj, emerge)
     end
 
     if not origin_pos or origin_pos == nil then
-        origin_pos = obj.meta.dest
+        origin_pos = obj_table.meta.dest
     end
 
-    if emerge then
+    if emerge_cb then
         -- minetest.log(">>> Emerging Emitted...")
-
         local pos1, pos2 = allocate_with_nodes(origin_pos, nodes)
 
         minetest.emerge_area(pos1, pos2, function(blockpos, action, calls_remaining, param)
             if calls_remaining == 0 then
+                -- preload area
                 local manip, area = schemlib.keep_loaded(pos1, pos2)
 
-                load_to_map(origin_pos, obj)
+                -- set nodes and meta
+                load_to_map(origin_pos, obj_table)
+
+                -- emerge completed callback
+                if emerge_cb ~= nil and type(emerge_cb) == 'function' then
+                    emerge_cb(obj_table)
+                end
             end
         end)
     end
 
-    return #nodes, obj.version, obj.meta
+    return #nodes, obj_table.version, obj_table.meta
 end
 
 -- Save to file
 function schemlib.emit(data, flags)
-    local min = data.min
-    local max = data.max
+    local min = data.min or data.pos1
+    local max = data.max or data.pos2
 
-    local sdata, count = {}, 0
+    local serial_data, count = {}, 0
     if flags.file_cache then
-        sdata, count = schemlib.serialize_json(data, flags, min, max)
+        serial_data, count = schemlib.serialize_json(data, flags, min, max)
     else
-        sdata, count = schemlib.serialize_table(data, flags, min, max)
+        serial_data, count = schemlib.serialize_table(data, flags, min, max)
     end
 
     if flags.file_cache and flags.file_cache == true then
@@ -290,18 +299,18 @@ function schemlib.emit(data, flags)
         local filename = path .. "/" .. data.filename
         local file = io.open(filename .. extension, "w")
         if file then
-            file:write(sdata)
+            file:write(serial_data)
             file:close()
         end
     end
 
-    if flags.origin_clear and flags.origin_clear == true then
-        minetest.after(15, function()
-            schemlib.clear_position(pos1, pos2)
+    --[[if flags.origin_clear and data.ttl and data.ttl >= 1 then
+        minetest.after(data.ttl * 10, function()
+            schemlib.clear_position(min, max)
         end)
-    end
+    end]]
 
-    return sdata
+    return serial_data, count
 end
 
 -- Load from file in schemlib local storage

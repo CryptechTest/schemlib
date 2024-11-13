@@ -93,9 +93,12 @@ function schemlib.serialize_table(head, flags, pos1, pos2)
     local json_header = schemlib.get_serialized_header(head, count)
     local json_flags = schemlib.get_serialized_flags(flags)
     local table = {}
-    local header = minetest.parse_json("{" .. json_header .. "}")
+    local header = minetest.parse_json("{" .. json_header .. "," .. json_flags .. "}")
+    table.version = header.version
+    table.format = "table"
+    table.type = header.type
     table.meta = header.meta
-    table.flags = minetest.parse_json(json_flags)
+    table.flags = header.flags
     table.cuboid = result
     return table, count
 end
