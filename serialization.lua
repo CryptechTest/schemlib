@@ -1,4 +1,4 @@
-schemlib.LATEST_SERIALIZATION_VERSION = 7
+schemlib.LATEST_SERIALIZATION_VERSION = 8
 
 local function deepcopy(orig)
     local orig_type = type(orig)
@@ -15,7 +15,6 @@ local function deepcopy(orig)
     return copy
 end
 
-
 --- Converts the region defined by positions `pos1` and `pos2`
 -- into a single string.
 -- @return The serialized data.
@@ -24,7 +23,8 @@ function schemlib.serialize(pos1, pos2)
     pos1, pos2 = schemlib.sort_pos(pos1, pos2)
     schemlib.keep_loaded(pos1, pos2)
 
-    local get_node, get_meta, hash_node_position = minetest.get_node, minetest.get_meta, minetest.hash_node_position
+    local get_node, get_meta, hash_node_position, get_node_timer = minetest.get_node, minetest.get_meta,
+        minetest.hash_node_position, minetest.get_node_timer
 
     -- Find the positions which have metadata
     local has_meta = {}
@@ -66,6 +66,17 @@ function schemlib.serialize(pos1, pos2)
                         end
                     end
 
+                    local timer
+                    if minetest.registered_nodes[node.name].on_timer ~= nil then
+                        local on_timer = get_node_timer(pos)
+                        -- convert node_timer userdata to storage object
+                        timer = {
+                            timeout = on_timer:get_timeout(),
+                            elapsed = on_timer:get_elapsed(),
+                            started = on_timer:is_started()
+                        }
+                    end
+
                     result[count] = {
                         x = pos.x - pos1.x,
                         y = pos.y - pos1.y,
@@ -73,7 +84,8 @@ function schemlib.serialize(pos1, pos2)
                         name = node.name,
                         param1 = node.param1 ~= 0 and node.param1 or nil,
                         param2 = node.param2 ~= 0 and node.param2 or nil,
-                        meta = meta
+                        meta = meta,
+                        timer = timer
                     }
                 end
                 pos.z = pos.z + 1

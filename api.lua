@@ -25,7 +25,7 @@ local function load_to_map(origin_pos, obj)
     local nodes = obj.cuboid
     local o = obj.meta.offset
     local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
-    local add_node, get_meta = minetest.add_node, minetest.get_meta
+    local add_node, get_meta, get_node_timer = minetest.add_node, minetest.get_meta, minetest.get_node_timer
     -- local data = manip:get_data()
     for i, entry in ipairs(nodes) do
         entry.x, entry.y, entry.z = origin_x + (entry.x - o.x), origin_y + (entry.y - o.y), origin_z + (entry.z - o.z)
@@ -34,6 +34,13 @@ local function load_to_map(origin_pos, obj)
 
         if entry.meta then
             get_meta(entry):from_table(entry.meta)
+        end
+
+        if entry.timer then
+            get_node_timer(entry):set(entry.timer.timeout, entry.timer.elapsed)
+            if not entry.timer.started then
+                get_node_timer(entry):stop()
+            end
         end
     end
 end
