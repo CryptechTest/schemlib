@@ -43,7 +43,7 @@ function schemlib.keep_loaded(pos1, pos2)
     -- Create a vmanip and read the area from map, this
     -- causes all MapBlocks to be loaded into memory.
     -- This doesn't actually *keep* them loaded, unlike the name implies.
-    -- local manip = minetest.get_voxel_manip()
+    -- local manip = core.get_voxel_manip()
     local manip = VoxelManip(pos1, pos2)
     local e1, e2 = manip:read_from_map(pos1, pos2)
     local area = VoxelArea:new({

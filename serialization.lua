@@ -1,4 +1,3 @@
-schemlib.LATEST_SERIALIZATION_VERSION = 8
 
 local function deepcopy(orig)
     local orig_type = type(orig)
@@ -19,18 +18,24 @@ end
 -- into a single string.
 -- @return The serialized data.
 -- @return The number of nodes serialized.
-function schemlib.serialize(pos1, pos2)
+function schemlib.serialize(pos1, pos2, flags)
     pos1, pos2 = schemlib.sort_pos(pos1, pos2)
     schemlib.keep_loaded(pos1, pos2)
 
-    local get_node, get_meta, hash_node_position, get_node_timer = minetest.get_node, minetest.get_meta,
-        minetest.hash_node_position, minetest.get_node_timer
+    local get_node, get_meta, hash_node_position, get_node_timer = 
+        core.get_node, core.get_meta, core.hash_node_position, core.get_node_timer
+
+    local keep_meta = flags and flags.keep_meta or true
+    local keep_timers = flags and flags.keep_timers or true
+    local stop_timers = flags and flags.stop_timers or false
 
     -- Find the positions which have metadata
     local has_meta = {}
-    local meta_positions = minetest.find_nodes_with_meta(pos1, pos2)
-    for i = 1, #meta_positions do
-        has_meta[hash_node_position(meta_positions[i])] = true
+    if keep_meta then
+        local meta_positions = core.find_nodes_with_meta(pos1, pos2)
+        for i = 1, #meta_positions do
+            has_meta[hash_node_position(meta_positions[i])] = true
+        end
     end
 
     local pos = {
@@ -46,15 +51,14 @@ function schemlib.serialize(pos1, pos2)
             pos.z = pos1.z
             while pos.z <= pos2.z do
                 local node = get_node(pos)
-                if minetest.registered_nodes[node.name] == nil then
+                if core.registered_nodes[node.name] == nil then
                     -- ignore
                 elseif node.name ~= "ignore" and node.name ~= "vacuum:vacuum" and node.name ~= "asteroid:atmos" then
                     count = count + 1
 
                     local meta
-                    if has_meta[hash_node_position(pos)] then
+                    if keep_meta and has_meta[hash_node_position(pos)] then
                         meta = get_meta(pos):to_table()
-
                         -- Convert metadata item stacks to item strings
                         for _, invlist in pairs(meta.inventory) do
                             for index = 1, #invlist do
@@ -67,14 +71,19 @@ function schemlib.serialize(pos1, pos2)
                     end
 
                     local timer
-                    if minetest.registered_nodes[node.name].on_timer ~= nil then
+                    if core.registered_nodes[node.name].on_timer ~= nil then
                         local on_timer = get_node_timer(pos)
-                        -- convert node_timer userdata to storage object
-                        timer = {
-                            timeout = on_timer:get_timeout(),
-                            elapsed = on_timer:get_elapsed(),
-                            started = on_timer:is_started()
-                        }
+                        if keep_timers then
+                            -- convert node_timer userdata to storage object
+                            timer = {
+                                timeout = on_timer:get_timeout(),
+                                elapsed = on_timer:get_elapsed(),
+                                started = on_timer:is_started()
+                            }
+                        end
+                        if stop_timers and on_timer:is_started() then
+                            on_timer:stop()
+                        end
                     end
 
                     result[count] = {
@@ -98,14 +107,14 @@ function schemlib.serialize(pos1, pos2)
 end
 
 function schemlib.serialize_table(head, flags, pos1, pos2)
-    local result, count = schemlib.serialize(pos1, pos2)
+    local result, count = schemlib.serialize(pos1, pos2, flags)
     head.size = schemlib.size(pos1, pos2)
     head.volume = schemlib.volume(pos1, pos2)
     -- Serialize entries
     local json_header = schemlib.get_serialized_header(head, count)
     local json_flags = schemlib.get_serialized_flags(flags)
     local table = {}
-    local header = minetest.parse_json("{" .. json_header .. "," .. json_flags .. "}")
+    local header = core.parse_json("{" .. json_header .. "," .. json_flags .. "}")
     table.version = header.version
     table.format = "table"
     table.type = header.type
@@ -116,9 +125,9 @@ function schemlib.serialize_table(head, flags, pos1, pos2)
 end
 
 function schemlib.serialize_json(head, flags, pos1, pos2)
-    local result, count = schemlib.serialize(pos1, pos2)
+    local result, count = schemlib.serialize(pos1, pos2, flags)
     -- Serialize entries
-    local json_result = minetest.write_json(result)
+    local json_result = core.write_json(result)
     head.size = schemlib.size(pos1, pos2)
     head.volume = schemlib.volume(pos1, pos2)
     local json_header = schemlib.get_serialized_header(head, count)

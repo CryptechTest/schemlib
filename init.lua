@@ -1,25 +1,25 @@
-dofile(minetest.get_modpath("schemlib") .. "/api.lua")
+dofile(core.get_modpath("schemlib") .. "/api.lua")
 
-local path = minetest.get_worldpath() .. "/schemlib"
-local dir_list =minetest.get_dir_list(minetest.get_worldpath(), true)
+local path = core.get_worldpath() .. "/schemlib"
+local dir_list =core.get_dir_list(core.get_worldpath(), true)
 if not dir_list then
-    minetest.mkdir(path)
+    core.mkdir(path)
 end
 local exists = false
 for i, dir in ipairs(dir_list) do
     if dir == "schemlib" then
         exists = true
-        minetest.log("action", "[schemlib] Found schemlib directory")
+        core.log("action", "[schemlib] Found schemlib directory")
         break
     end
 end
 if not exists then
-    minetest.mkdir(path)
-    minetest.log("action", "[schemlib] Created schemlib directory")
+    core.mkdir(path)
+    core.log("action", "[schemlib] Created schemlib directory")
 end
 
 
-minetest.register_craftitem("schemlib:wand", {
+core.register_craftitem("schemlib:wand", {
     description = "Schematic Wand",
     inventory_image = "default_stick.png^[colorize:#ff75ffbf",
     wield_image = "default_stick.png^[colorize:#ff75ffbf",
@@ -60,7 +60,7 @@ minetest.register_craftitem("schemlib:wand", {
 	end,
 })
 
-minetest.register_entity("schemlib:pos1", {
+core.register_entity("schemlib:pos1", {
 	initial_properties = {
 		visual = "cube",
 		visual_size = {x=1.1, y=1.1},
@@ -96,7 +96,7 @@ minetest.register_entity("schemlib:pos1", {
             end
         end
         local player_online = false
-        for _, player in ipairs(minetest.get_connected_players()) do
+        for _, player in ipairs(core.get_connected_players()) do
             if player:get_player_name() == self.player then
                 player_online = true
                 break
@@ -114,7 +114,7 @@ minetest.register_entity("schemlib:pos1", {
     end,
 })
 
-minetest.register_entity("schemlib:pos2", {
+core.register_entity("schemlib:pos2", {
 	initial_properties = {
 		visual = "cube",
 		visual_size = {x=1.1, y=1.1},
@@ -152,7 +152,7 @@ minetest.register_entity("schemlib:pos2", {
             end
         end
         local player_online = false
-        for _, player in ipairs(minetest.get_connected_players()) do
+        for _, player in ipairs(core.get_connected_players()) do
             if player:get_player_name() == self.player then
                 player_online = true
                 break
@@ -170,7 +170,7 @@ minetest.register_entity("schemlib:pos2", {
     end,
 })
 
-minetest.register_entity("schemlib:cuboid", {
+core.register_entity("schemlib:cuboid", {
     initial_properties = {
         visual = "cube",
         backface_culling = false,
@@ -197,12 +197,12 @@ minetest.register_entity("schemlib:cuboid", {
             local data = staticdata:split(';')
             if data and data[1] and data[2] and data[3] then
                 self.player = data[1]
-                self.pos1 = minetest.string_to_pos(data[2])
-                self.pos2 = minetest.string_to_pos(data[3])
+                self.pos1 = core.string_to_pos(data[2])
+                self.pos2 = core.string_to_pos(data[3])
             end
         end
         local player_online = false
-        for _, player in ipairs(minetest.get_connected_players()) do
+        for _, player in ipairs(core.get_connected_players()) do
             if player:get_player_name() == self.player then
                 player_online = true
                 break
@@ -225,23 +225,23 @@ minetest.register_entity("schemlib:cuboid", {
     end,
     get_staticdata = function(self)
         if self.player ~= nil and self.pos1 ~= nil and self.pos2 ~= nil then
-            return self.player .. ";" .. minetest.pos_to_string(self.pos1) .. ";" .. minetest.pos_to_string(self.pos2)
+            return self.player .. ";" .. core.pos_to_string(self.pos1) .. ";" .. core.pos_to_string(self.pos2)
         end
         return ""
     end,
 })
 
-minetest.register_privilege("schemlib", {
+core.register_privilege("schemlib", {
 	description = "Allow player to use schemlib",
 	give_to_singleplayer = false,
 	give_to_admin = true,
 })
 
-minetest.register_chatcommand("pos1", {
+core.register_chatcommand("pos1", {
     description = "Set position 1 to the current position",
     privs = {schemlib = true},
     func = function(name, param)
-        local player = minetest.get_player_by_name(name)
+        local player = core.get_player_by_name(name)
         if player == nil then
             return true, "This command can only be used by a player"
         end
@@ -252,11 +252,11 @@ minetest.register_chatcommand("pos1", {
     end,
 })
 
-minetest.register_chatcommand("pos2", {
+core.register_chatcommand("pos2", {
     description = "Set position 2 to the current position",
     privs = {schemlib = true},
     func = function(name, param)
-        local player = minetest.get_player_by_name(name)
+        local player = core.get_player_by_name(name)
         if player == nil then
             return true, "This command can only be used by a player"
         end
@@ -267,11 +267,11 @@ minetest.register_chatcommand("pos2", {
     end,
 })
 
-minetest.register_chatcommand("clear_selection", {
+core.register_chatcommand("clear_selection", {
     description = "Clear the current selection",
     privs = {schemlib = true},
     func = function(name, param)
-        local player = minetest.get_player_by_name(name)
+        local player = core.get_player_by_name(name)
         if player == nil then
             return true, "This command can only be used by a player"
         end
@@ -280,11 +280,11 @@ minetest.register_chatcommand("clear_selection", {
     end,
 })
 
-minetest.register_chatcommand("schematic_wand",{
+core.register_chatcommand("schematic_wand",{
     description = "Give the player a schematic wand",
     privs = {schemlib = true},
     func = function(name, param)
-        local player = minetest.get_player_by_name(name)
+        local player = core.get_player_by_name(name)
         if player == nil then
             return true, "This command can only be used by a player"
         end
@@ -304,12 +304,12 @@ minetest.register_chatcommand("schematic_wand",{
     end,
 })
 
-minetest.register_chatcommand("save_schematic", {
+core.register_chatcommand("save_schematic", {
     params = "<name> (force)",
     description = "Save the current selection as a schematic",
     privs = {schemlib = true},
     func = function(name, param)
-        local player = minetest.get_player_by_name(name)
+        local player = core.get_player_by_name(name)
         if player == nil then
             return true, "This command can only be used by a player"
         end
@@ -331,7 +331,7 @@ minetest.register_chatcommand("save_schematic", {
         else
             force = false
         end
-        minetest.chat_send_player(name, "Force: " .. tostring(force))
+        core.chat_send_player(name, "Force: " .. tostring(force))
         local file = io.open(schem_path .. ".mtx", "r")
         if not force and file then
             file:close()
@@ -370,12 +370,12 @@ minetest.register_chatcommand("save_schematic", {
     end,
 })
 
-minetest.register_chatcommand("load_schematic", {
+core.register_chatcommand("load_schematic", {
     params = "<name>",
     description = "Load a schematic into the world at the current position",
     privs = {schemlib = true},
     func = function(name, param)
-        local player = minetest.get_player_by_name(name)
+        local player = core.get_player_by_name(name)
         if player == nil then
             return true, "This command can only be used by a player"
         end

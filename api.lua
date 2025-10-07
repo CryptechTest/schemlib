@@ -2,12 +2,12 @@ schemlib = {}
 
 local extension = ".mtx"
 local storage_dir = "schemlib"
-local world_path = minetest.get_worldpath()
+local world_path = core.get_worldpath()
 
 
-dofile(minetest.get_modpath("schemlib") .. "/util.lua")
-dofile(minetest.get_modpath("schemlib") .. "/serialization.lua")
-dofile(minetest.get_modpath("schemlib") .. "/mtx.lua")
+dofile(core.get_modpath("schemlib") .. "/util.lua")
+dofile(core.get_modpath("schemlib") .. "/serialization.lua")
+dofile(core.get_modpath("schemlib") .. "/mtx.lua")
 
 local extents = {}
 
@@ -15,7 +15,7 @@ local extents = {}
 local function load_json_schematic(value)
     local obj = {}
     if value then
-        obj = minetest.parse_json(value)
+        obj = core.parse_json(value)
         return obj
     end
     return obj
@@ -25,7 +25,7 @@ local function load_to_map(origin_pos, obj)
     local nodes = obj.cuboid
     local o = obj.meta.offset
     local origin_x, origin_y, origin_z = origin_pos.x, origin_pos.y, origin_pos.z
-    local add_node, get_meta, get_node_timer = minetest.add_node, minetest.get_meta, minetest.get_node_timer
+    local add_node, get_meta, get_node_timer = core.add_node, core.get_meta, core.get_node_timer
     -- local data = manip:get_data()
     for i, entry in ipairs(nodes) do
         entry.x, entry.y, entry.z = origin_x + (entry.x - o.x), origin_y + (entry.y - o.y), origin_z + (entry.z - o.z)
@@ -97,7 +97,7 @@ function schemlib.set_pos1(player, pos)
         tmp = {}
     end
     if tmp.pos1 then
-        for obj in minetest.objects_inside_radius(tmp.pos1, 1) do
+        for obj in core.objects_inside_radius(tmp.pos1, 1) do
 
             if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:pos1" then
                 if obj:get_luaentity():get_staticdata() == name then
@@ -117,7 +117,7 @@ function schemlib.set_pos1(player, pos)
                 math.max(tmp.pos1.y, tmp.pos2.y),
                 math.max(tmp.pos1.z, tmp.pos2.z)
             )
-            for obj in minetest.objects_in_area(min, max) do
+            for obj in core.objects_in_area(min, max) do
                 if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:cuboid" then
                     local data = obj:get_luaentity():get_staticdata()
                     if data:split(";")[1] == name then
@@ -130,15 +130,15 @@ function schemlib.set_pos1(player, pos)
     tmp.pos1 = pos
     extents[name] = tmp
     if pos ~= nil then
-        minetest.add_entity(pos, "schemlib:pos1", player:get_player_name())
-        minetest.chat_send_player(name, "Position 1 set to " .. minetest.pos_to_string(pos))
+        core.add_entity(pos, "schemlib:pos1", player:get_player_name())
+        core.chat_send_player(name, "Position 1 set to " .. core.pos_to_string(pos))
         if tmp.pos2 then
             local middle = vector.divide(vector.add(tmp.pos1, tmp.pos2), 2)
-            minetest.add_entity(middle, "schemlib:cuboid", player:get_player_name() .. ";" .. minetest.pos_to_string(tmp.pos1) .. ";" .. minetest.pos_to_string(tmp.pos2))
-            minetest.chat_send_player(name, "Region selected from " .. minetest.pos_to_string(tmp.pos1) .. " to " .. minetest.pos_to_string(tmp.pos2))
+            core.add_entity(middle, "schemlib:cuboid", player:get_player_name() .. ";" .. core.pos_to_string(tmp.pos1) .. ";" .. core.pos_to_string(tmp.pos2))
+            core.chat_send_player(name, "Region selected from " .. core.pos_to_string(tmp.pos1) .. " to " .. core.pos_to_string(tmp.pos2))
         end
     else
-        minetest.chat_send_player(name, "Position 1 cleared")
+        core.chat_send_player(name, "Position 1 cleared")
     end
     
 end
@@ -150,7 +150,7 @@ function schemlib.set_pos2(player, pos)
         tmp = {}
     end
     if tmp.pos2 then
-        for obj in minetest.objects_inside_radius(tmp.pos2, 1) do
+        for obj in core.objects_inside_radius(tmp.pos2, 1) do
             if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:pos2" then
                 if obj:get_luaentity():get_staticdata() == name then
                     obj:remove()
@@ -168,7 +168,7 @@ function schemlib.set_pos2(player, pos)
                 math.max(tmp.pos1.y, tmp.pos2.y),
                 math.max(tmp.pos1.z, tmp.pos2.z)
             )
-            for obj in minetest.objects_in_area(min, max) do
+            for obj in core.objects_in_area(min, max) do
                 if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:cuboid" then
                     local data = obj:get_luaentity():get_staticdata()
                     if data:split(";")[1] == name then
@@ -181,16 +181,16 @@ function schemlib.set_pos2(player, pos)
     tmp.pos2 = pos
     extents[name] = tmp
     if pos ~= nil then
-        minetest.add_entity(pos, "schemlib:pos2", player:get_player_name())
-        minetest.chat_send_player(name, "Position 2 set to " .. minetest.pos_to_string(pos))
+        core.add_entity(pos, "schemlib:pos2", player:get_player_name())
+        core.chat_send_player(name, "Position 2 set to " .. core.pos_to_string(pos))
         if tmp.pos1 then
             local middle = vector.divide(vector.add(tmp.pos1, tmp.pos2), 2)
-            minetest.add_entity(middle, "schemlib:cuboid", player:get_player_name() .. ";" .. minetest.pos_to_string(tmp.pos1) .. ";" .. minetest.pos_to_string(tmp.pos2))
-            minetest.chat_send_player(name, "Region selected from " .. minetest.pos_to_string(tmp.pos1) .. " to " .. minetest.pos_to_string(tmp.pos2))
+            core.add_entity(middle, "schemlib:cuboid", player:get_player_name() .. ";" .. core.pos_to_string(tmp.pos1) .. ";" .. core.pos_to_string(tmp.pos2))
+            core.chat_send_player(name, "Region selected from " .. core.pos_to_string(tmp.pos1) .. " to " .. core.pos_to_string(tmp.pos2))
         end
 
     else
-        minetest.chat_send_player(name, "Position 2 cleared")
+        core.chat_send_player(name, "Position 2 cleared")
     end
 
 end
@@ -202,7 +202,7 @@ function schemlib.clear_selection(player)
         tmp = {}
     end
     if tmp.pos1 then
-        for obj in minetest.objects_inside_radius(tmp.pos1, 1) do
+        for obj in core.objects_inside_radius(tmp.pos1, 1) do
             if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:pos1" then
                 if obj:get_luaentity():get_staticdata() == name then
                     obj:remove()
@@ -211,7 +211,7 @@ function schemlib.clear_selection(player)
         end
     end
     if tmp.pos2 then
-        for obj in minetest.objects_inside_radius(tmp.pos2, 1) do
+        for obj in core.objects_inside_radius(tmp.pos2, 1) do
             if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:pos2" then
                 if obj:get_luaentity():get_staticdata() == name then
                     obj:remove()
@@ -230,7 +230,7 @@ function schemlib.clear_selection(player)
             math.max(tmp.pos1.y, tmp.pos2.y),
             math.max(tmp.pos1.z, tmp.pos2.z)
         )
-        for obj in minetest.objects_in_area(min, max) do
+        for obj in core.objects_in_area(min, max) do
             if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:cuboid" then
                 local data = obj:get_luaentity():get_staticdata()
                 if data:split(";")[1] == name then
@@ -240,7 +240,7 @@ function schemlib.clear_selection(player)
         end
     end
     extents[name] = nil
-    minetest.chat_send_player(name, "Selection cleared")
+    core.chat_send_player(name, "Selection cleared")
 end
 
 --- Loads the nodes represented by string `json_obj` at position `origin_pos`.
@@ -249,7 +249,7 @@ function schemlib.process_emitted(origin_pos, obj_json, obj_table, emerge_cb)
     if obj_json == nil and obj_table == nil then
         return nil
     end
-    -- minetest.log(">>> Loading Emitted...")
+    -- core.log(">>> Loading Emitted...")
     if obj_table == nil then
         obj_table = load_json_schematic(obj_json)
     end
@@ -266,23 +266,26 @@ function schemlib.process_emitted(origin_pos, obj_json, obj_table, emerge_cb)
     end
 
     if emerge_cb then
-        -- minetest.log(">>> Emerging Emitted...")
+        -- core.log(">>> Emerging Emitted...")
         local pos1, pos2 = allocate_with_nodes(origin_pos, nodes)
 
-        minetest.emerge_area(pos1, pos2, function(blockpos, action, calls_remaining, param)
+        -- emerge complete callback
+        local function emerge_area_callback_complete(blockpos, action, calls_remaining, param)
             if calls_remaining == 0 then
                 -- preload area
                 local manip, area = schemlib.keep_loaded(pos1, pos2)
-
                 -- set nodes and meta
                 load_to_map(origin_pos, obj_table)
 
                 -- emerge completed callback
                 if emerge_cb ~= nil and type(emerge_cb) == 'function' then
-                    emerge_cb(obj_table)
+                    emerge_cb(obj_table.meta, obj_table.flags)
                 end
             end
-        end)
+        end
+        
+        -- load area to world
+        core.emerge_area(pos1, pos2, emerge_area_callback_complete)
     end
 
     return #nodes, obj_table.version, obj_table.meta
@@ -302,7 +305,7 @@ function schemlib.emit(data, flags)
 
     if flags.file_cache and flags.file_cache == true then
         local path = world_path .. "/" .. storage_dir
-        minetest.mkdir(path)
+        core.mkdir(path)
         local filename = path .. "/" .. data.filename
         local file = io.open(filename .. extension, "w")
         if file then
@@ -310,12 +313,6 @@ function schemlib.emit(data, flags)
             file:close()
         end
     end
-
-    --[[if flags.origin_clear and data.ttl and data.ttl >= 1 then
-        minetest.after(data.ttl * 10, function()
-            schemlib.clear_position(min, max)
-        end)
-    end]]
 
     return serial_data, count
 end
@@ -335,7 +332,7 @@ end
 
 -- Load from file from any path
 function schemlib.load_emitted_file(data)
-    minetest.log(">>>> loading " .. data.filename)
+    core.log(">>>> loading " .. data.filename)
     local file = io.open(data.filepath .. "/" .. data.filename .. extension, "r")
     local content = ""
     local chunksize = 32768
@@ -346,17 +343,17 @@ function schemlib.load_emitted_file(data)
             if not chunk then
                 break
             end
-            minetest.log(">> Loaded chunk " .. c)
+            core.log(">> Loaded chunk " .. c)
             c = c + 1
             content = content .. chunk
         end
         file:close()
     end
     -- local content = file:read("*all")
-    minetest.log(">>>> File Loaded " .. data.filename)
+    core.log(">>>> File Loaded " .. data.filename)
     local count, ver, meta = schemlib.process_emitted(data.origin, content, nil, data.emerge)
 
-    minetest.log(">>> Emitted Load " .. data.filename)
+    core.log(">>> Emitted Load " .. data.filename)
     return meta
 end
 
