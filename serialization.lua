@@ -1,4 +1,3 @@
-
 local function deepcopy(orig)
     local orig_type = type(orig)
     local copy
@@ -14,6 +13,14 @@ local function deepcopy(orig)
     return copy
 end
 
+local function list_set(list)
+    local set = {}
+    for _, l in ipairs(list) do
+        set[l] = true
+    end
+    return set
+end
+
 --- Converts the region defined by positions `pos1` and `pos2`
 -- into a single string.
 -- @return The serialized data.
@@ -22,12 +29,13 @@ function schemlib.serialize(pos1, pos2, flags)
     pos1, pos2 = schemlib.sort_pos(pos1, pos2)
     schemlib.keep_loaded(pos1, pos2)
 
-    local get_node, get_meta, hash_node_position, get_node_timer = 
-        core.get_node, core.get_meta, core.hash_node_position, core.get_node_timer
+    local get_node, get_meta, hash_node_position, get_node_timer = core.get_node, core.get_meta,
+        core.hash_node_position, core.get_node_timer
 
     local keep_meta = flags and flags.keep_meta or true
     local keep_timers = flags and flags.keep_timers or true
     local stop_timers = flags and flags.stop_timers or false
+    local ignored_nodes = flags and flags.ignored_nodes or {}
 
     -- Find the positions which have metadata
     local has_meta = {}
@@ -51,10 +59,7 @@ function schemlib.serialize(pos1, pos2, flags)
             pos.z = pos1.z
             while pos.z <= pos2.z do
                 local node = get_node(pos)
-                if core.registered_nodes[node.name] == nil then
-                    -- ignore
-                elseif node.name ~= "ignore" and node.name ~= "vacuum:vacuum" and node.name ~= "asteroid:atmos" then
-                    count = count + 1
+                if core.registered_nodes[node.name] ~= nil and node.name ~= "ignore" and list_set(ignored_nodes)[node.name] == nil then
 
                     local meta
                     if keep_meta and has_meta[hash_node_position(pos)] then
@@ -85,7 +90,7 @@ function schemlib.serialize(pos1, pos2, flags)
                             on_timer:stop()
                         end
                     end
-
+                    
                     result[count] = {
                         x = pos.x - pos1.x,
                         y = pos.y - pos1.y,
@@ -96,6 +101,7 @@ function schemlib.serialize(pos1, pos2, flags)
                         meta = meta,
                         timer = timer
                     }
+                    count = count + 1
                 end
                 pos.z = pos.z + 1
             end
