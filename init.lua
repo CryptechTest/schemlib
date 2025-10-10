@@ -363,7 +363,9 @@ core.register_chatcommand("save_schematic", {
             file_cache = true,
             keep_inv = true,
             keep_meta = true,
-            origin_clear = false
+            origin_clear = false,
+            keep_timers = true,
+            stop_timers = false
         }
         schemlib.emit(data, flags)
        return true, "Schematic saved as " .. schem_name .. ".mtx"
