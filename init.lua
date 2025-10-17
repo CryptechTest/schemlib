@@ -104,15 +104,20 @@ core.register_entity("schemlib:pos1", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+            end
             return
         end
         local extent = schemlib.get_selection(core.get_player_by_name(self.player))
         if not extent or not extent.pos1 then
             self.object:remove()
+            schemlib.set_pos1(core.get_player_by_name(self.player), nil)
             return
         end
         if vector.equals(self.object:get_pos(), extent.pos1) == false then
             self.object:remove()
+            schemlib.set_pos1(core.get_player_by_name(self.player), nil)
             return
         end
     end,
@@ -126,6 +131,9 @@ core.register_entity("schemlib:pos1", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+            end
             return
         end
     end,
@@ -139,14 +147,20 @@ core.register_entity("schemlib:pos1", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+            end
+            return
         end
         local extent = schemlib.get_selection(core.get_player_by_name(self.player))
         if not extent or not extent.pos1 then
             self.object:remove()
+            schemlib.set_pos1(core.get_player_by_name(self.player), nil)
             return
         end
         if vector.equals(self.object:get_pos(), extent.pos1) == false then
             self.object:remove()
+            schemlib.set_pos1(core.get_player_by_name(self.player), nil)
             return
         end
     end,
@@ -204,13 +218,21 @@ core.register_entity("schemlib:pos2", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            end
+            return
         end
         local extent = schemlib.get_selection(core.get_player_by_name(self.player))
         if not extent or not extent.pos2 then
             self.object:remove()
+            schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            return
         end
         if vector.equals(self.object:get_pos(), extent.pos2) == false then
             self.object:remove()
+            schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            return
         end
     end,
     on_deactivate = function(self)
@@ -223,6 +245,9 @@ core.register_entity("schemlib:pos2", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            end
             return
         end
     end,
@@ -236,15 +261,20 @@ core.register_entity("schemlib:pos2", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            end
             return
         end
         local extent = schemlib.get_selection(core.get_player_by_name(self.player))
         if not extent or not extent.pos2 then
             self.object:remove()
+            schemlib.set_pos2(core.get_player_by_name(self.player), nil)
             return
         end
         if vector.equals(self.object:get_pos(), extent.pos2) == false then
             self.object:remove()
+            schemlib.set_pos2(core.get_player_by_name(self.player), nil)
             return
         end
     end,
@@ -296,15 +326,27 @@ core.register_entity("schemlib:cuboid", {
         end
         if self.player == nil or not player_online or self.pos1 == nil or self.pos2 == nil then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+                schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            end
             return
         end
         local extent = schemlib.get_selection(core.get_player_by_name(self.player))
         if not extent or not extent.pos1 or not extent.pos2 then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+                schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            end
             return
         end
         if vector.equals(self.pos1, extent.pos1) == false or vector.equals(self.pos2, extent.pos2) == false then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+                schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            end
             return
         end
         -- calculate the size of the cuboid based on the two positions
@@ -327,6 +369,11 @@ core.register_entity("schemlib:cuboid", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+                schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            end
+            return
         end
     end,
     on_step = function(self, dtime)
@@ -339,15 +386,23 @@ core.register_entity("schemlib:cuboid", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            if self.player ~= nil then
+                schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+                schemlib.set_pos2(core.get_player_by_name(self.player), nil)
+            end
             return
         end
         local extent = schemlib.get_selection(core.get_player_by_name(self.player))
         if not extent or not extent.pos1 or not extent.pos2 then
             self.object:remove()
+            schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+            schemlib.set_pos2(core.get_player_by_name(self.player), nil)
             return
         end
         if vector.equals(self.pos1, extent.pos1) == false or vector.equals(self.pos2, extent.pos2) == false then
             self.object:remove()
+            schemlib.set_pos1(core.get_player_by_name(self.player), nil)
+            schemlib.set_pos2(core.get_player_by_name(self.player), nil)
             return
         end
     end,
