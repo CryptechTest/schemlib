@@ -1,7 +1,7 @@
 dofile(core.get_modpath("schemlib") .. "/api.lua")
 
 local path = core.get_worldpath() .. "/schemlib"
-local dir_list =core.get_dir_list(core.get_worldpath(), true)
+local dir_list = core.get_dir_list(core.get_worldpath(), true)
 if not dir_list then
     core.mkdir(path)
 end
@@ -23,19 +23,19 @@ core.register_craftitem("schemlib:wand", {
     description = "Schematic Wand",
     inventory_image = "default_stick.png^[colorize:#ff75ffbf",
     wield_image = "default_stick.png^[colorize:#ff75ffbf",
-    groups = {not_in_creative_inventory = 1},
+    groups = { not_in_creative_inventory = 1 },
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
             local pos = pointed_thing.under
             schemlib.set_pos1(user, pos)
         elseif pointed_thing.type == "object" then
-			local entity = pointed_thing.ref:get_luaentity()
-			if entity and entity.name == "schemlib:pos2" then
+            local entity = pointed_thing.ref:get_luaentity()
+            if entity and entity.name == "schemlib:pos2" then
                 local name = user:get_player_name()
-				if entity:get_staticdata() == name then
+                if entity:get_staticdata() == name then
                     schemlib.set_pos1(user, pointed_thing.ref:get_pos())
                 end
-			end
+            end
         end
         return itemstack
     end,
@@ -46,32 +46,32 @@ core.register_craftitem("schemlib:wand", {
         end
     end,
     on_secondary_use = function(itemstack, user, pointed_thing)
-		if user == nil or (pointed_thing or {}).type ~= "object" then
-			return itemstack
-		end
-		local name = user:get_player_name()
-		local entity = pointed_thing.ref:get_luaentity()
-		if entity and entity.name == "schemlib:pos1" then
-			if entity:get_staticdata() == name then
+        if user == nil or (pointed_thing or {}).type ~= "object" then
+            return itemstack
+        end
+        local name = user:get_player_name()
+        local entity = pointed_thing.ref:get_luaentity()
+        if entity and entity.name == "schemlib:pos1" then
+            if entity:get_staticdata() == name then
                 schemlib.set_pos2(user, pointed_thing.ref:get_pos())
             end
-		end
-		return itemstack
-	end,
+        end
+        return itemstack
+    end,
 })
 
 core.register_entity("schemlib:pos1", {
-	initial_properties = {
-		visual = "cube",
-		visual_size = {x=1.1, y=1.1},
-		textures = {"schemlib_pos1.png", "schemlib_pos1.png",
-			"schemlib_pos1.png", "schemlib_pos1.png",
-			"schemlib_pos1.png", "schemlib_pos1.png"},
-		collisionbox = {-0.55, -0.55, -0.55, 0.55, 0.55, 0.55},
-		physical = false,
-		static_save = true,
+    initial_properties = {
+        visual = "cube",
+        visual_size = { x = 1.1, y = 1.1 },
+        textures = { "schemlib_pos1.png", "schemlib_pos1.png",
+            "schemlib_pos1.png", "schemlib_pos1.png",
+            "schemlib_pos1.png", "schemlib_pos1.png" },
+        collisionbox = { -0.55, -0.55, -0.55, 0.55, 0.55, 0.55 },
+        physical = false,
+        static_save = true,
         glow = 14,
-	},
+    },
     on_punch = function(self, puncher)
         if puncher == nil then
             return
@@ -85,9 +85,9 @@ core.register_entity("schemlib:pos1", {
             schemlib.set_pos1(puncher, nil)
         end
     end,
-	on_blast = function(self, damage)
-		return false, false, {}
-	end,
+    on_blast = function(self, damage)
+        return false, false, {}
+    end,
     on_activate = function(self, staticdata)
         if staticdata ~= nil and staticdata ~= "" then
             local data = staticdata:split(';')
@@ -104,10 +104,16 @@ core.register_entity("schemlib:pos1", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            return
         end
         local extent = schemlib.get_selection(core.get_player_by_name(self.player))
         if not extent or not extent.pos1 then
             self.object:remove()
+            return
+        end
+        if vector.equals(self.object:get_pos(), extent.pos1) == false then
+            self.object:remove()
+            return
         end
     end,
     on_deactivate = function(self)
@@ -120,6 +126,7 @@ core.register_entity("schemlib:pos1", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            return
         end
     end,
     on_step = function(self, dtime)
@@ -133,6 +140,15 @@ core.register_entity("schemlib:pos1", {
         if self.player == nil or not player_online then
             self.object:remove()
         end
+        local extent = schemlib.get_selection(core.get_player_by_name(self.player))
+        if not extent or not extent.pos1 then
+            self.object:remove()
+            return
+        end
+        if vector.equals(self.object:get_pos(), extent.pos1) == false then
+            self.object:remove()
+            return
+        end
     end,
     get_staticdata = function(self)
         if self.player ~= nil then
@@ -143,19 +159,19 @@ core.register_entity("schemlib:pos1", {
 })
 
 core.register_entity("schemlib:pos2", {
-	initial_properties = {
-		visual = "cube",
-		visual_size = {x=1.1, y=1.1},
-		textures = {
+    initial_properties = {
+        visual = "cube",
+        visual_size = { x = 1.1, y = 1.1 },
+        textures = {
             "schemlib_pos2.png", "schemlib_pos2.png",
-			"schemlib_pos2.png", "schemlib_pos2.png",
-			"schemlib_pos2.png", "schemlib_pos2.png"
+            "schemlib_pos2.png", "schemlib_pos2.png",
+            "schemlib_pos2.png", "schemlib_pos2.png"
         },
-		collisionbox = {-0.55, -0.55, -0.55, 0.55, 0.55, 0.55},
-		physical = false,
-		static_save = true,
+        collisionbox = { -0.55, -0.55, -0.55, 0.55, 0.55, 0.55 },
+        physical = false,
+        static_save = true,
         glow = 14,
-	},
+    },
     on_punch = function(self, puncher)
         if puncher == nil then
             return
@@ -169,9 +185,9 @@ core.register_entity("schemlib:pos2", {
             schemlib.set_pos2(puncher, nil)
         end
     end,
-	on_blast = function(self, damage)
-		return false, false, {}
-	end,
+    on_blast = function(self, damage)
+        return false, false, {}
+    end,
     on_activate = function(self, staticdata)
         if staticdata ~= nil and staticdata ~= "" then
             local data = staticdata:split(';')
@@ -193,8 +209,11 @@ core.register_entity("schemlib:pos2", {
         if not extent or not extent.pos2 then
             self.object:remove()
         end
+        if vector.equals(self.object:get_pos(), extent.pos2) == false then
+            self.object:remove()
+        end
     end,
-        on_deactivate = function(self)
+    on_deactivate = function(self)
         local player_online = false
         for _, player in ipairs(core.get_connected_players()) do
             if player:get_player_name() == self.player then
@@ -204,6 +223,7 @@ core.register_entity("schemlib:pos2", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            return
         end
     end,
     on_step = function(self, dtime)
@@ -216,6 +236,16 @@ core.register_entity("schemlib:pos2", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            return
+        end
+        local extent = schemlib.get_selection(core.get_player_by_name(self.player))
+        if not extent or not extent.pos2 then
+            self.object:remove()
+            return
+        end
+        if vector.equals(self.object:get_pos(), extent.pos2) == false then
+            self.object:remove()
+            return
         end
     end,
     get_staticdata = function(self)
@@ -230,20 +260,20 @@ core.register_entity("schemlib:cuboid", {
     initial_properties = {
         visual = "cube",
         backface_culling = false,
-        visual_size = {x=1, y=1},
+        visual_size = { x = 1, y = 1 },
         textures = {
             "schemlib_cuboid.png", "schemlib_cuboid.png",
             "schemlib_cuboid.png", "schemlib_cuboid.png",
             "schemlib_cuboid.png", "schemlib_cuboid.png"
         },
-        collisionbox = {0, 0, 0, 0, 0, 0},
+        collisionbox = { 0, 0, 0, 0, 0, 0 },
         physical = false,
         static_save = true,
         use_texture_alpha = true,
         glow = 14,
     },
     on_punch = function(self, puncher)
-       return
+        return
     end,
     on_blast = function(self, damage)
         return false, false, {}
@@ -273,6 +303,10 @@ core.register_entity("schemlib:cuboid", {
             self.object:remove()
             return
         end
+        if vector.equals(self.pos1, extent.pos1) == false or vector.equals(self.pos2, extent.pos2) == false then
+            self.object:remove()
+            return
+        end
         -- calculate the size of the cuboid based on the two positions
         local size = vector.add(vector.new(
             math.abs(self.pos1.x - self.pos2.x),
@@ -282,10 +316,8 @@ core.register_entity("schemlib:cuboid", {
         self.object:set_properties({
             visual_size = size,
         })
-
-
     end,
-        on_deactivate = function(self)
+    on_deactivate = function(self)
         local player_online = false
         for _, player in ipairs(core.get_connected_players()) do
             if player:get_player_name() == self.player then
@@ -307,6 +339,16 @@ core.register_entity("schemlib:cuboid", {
         end
         if self.player == nil or not player_online then
             self.object:remove()
+            return
+        end
+        local extent = schemlib.get_selection(core.get_player_by_name(self.player))
+        if not extent or not extent.pos1 or not extent.pos2 then
+            self.object:remove()
+            return
+        end
+        if vector.equals(self.pos1, extent.pos1) == false or vector.equals(self.pos2, extent.pos2) == false then
+            self.object:remove()
+            return
         end
     end,
     get_staticdata = function(self)
@@ -318,14 +360,14 @@ core.register_entity("schemlib:cuboid", {
 })
 
 core.register_privilege("schemlib", {
-	description = "Allow player to use schemlib",
-	give_to_singleplayer = false,
-	give_to_admin = true,
+    description = "Allow player to use schemlib",
+    give_to_singleplayer = false,
+    give_to_admin = true,
 })
 
 core.register_chatcommand("pos1", {
     description = "Set position 1 to the current position",
-    privs = {schemlib = true},
+    privs = { schemlib = true },
     func = function(name, param)
         local player = core.get_player_by_name(name)
         if player == nil then
@@ -340,7 +382,7 @@ core.register_chatcommand("pos1", {
 
 core.register_chatcommand("pos2", {
     description = "Set position 2 to the current position",
-    privs = {schemlib = true},
+    privs = { schemlib = true },
     func = function(name, param)
         local player = core.get_player_by_name(name)
         if player == nil then
@@ -355,7 +397,7 @@ core.register_chatcommand("pos2", {
 
 core.register_chatcommand("clear_selection", {
     description = "Clear the current selection",
-    privs = {schemlib = true},
+    privs = { schemlib = true },
     func = function(name, param)
         local player = core.get_player_by_name(name)
         if player == nil then
@@ -366,9 +408,9 @@ core.register_chatcommand("clear_selection", {
     end,
 })
 
-core.register_chatcommand("schematic_wand",{
+core.register_chatcommand("schematic_wand", {
     description = "Give the player a schematic wand",
-    privs = {schemlib = true},
+    privs = { schemlib = true },
     func = function(name, param)
         local player = core.get_player_by_name(name)
         if player == nil then
@@ -393,7 +435,7 @@ core.register_chatcommand("schematic_wand",{
 core.register_chatcommand("save_schematic", {
     params = "<name> (force)",
     description = "Save the current selection as a schematic",
-    privs = {schemlib = true},
+    privs = { schemlib = true },
     func = function(name, param)
         local player = core.get_player_by_name(name)
         if player == nil then
@@ -410,7 +452,7 @@ core.register_chatcommand("save_schematic", {
         if schem_name == nil then
             return true, "Invalid arguments"
         end
-        
+
         local schem_path = path .. "/" .. schem_name
         if force == "force" then
             force = true
@@ -454,14 +496,14 @@ core.register_chatcommand("save_schematic", {
             stop_timers = false
         }
         schemlib.emit(data, flags)
-       return true, "Schematic saved as " .. schem_name .. ".mtx"
+        return true, "Schematic saved as " .. schem_name .. ".mtx"
     end,
 })
 
 core.register_chatcommand("load_schematic", {
     params = "<name>",
     description = "Load a schematic into the world at the current position",
-    privs = {schemlib = true},
+    privs = { schemlib = true },
     func = function(name, param)
         local player = core.get_player_by_name(name)
         if player == nil then
@@ -492,6 +534,3 @@ end)
 core.register_on_shutdown(function()
     schemlib.clear_selections()
 end)
-
-
-
