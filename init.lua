@@ -105,6 +105,34 @@ core.register_entity("schemlib:pos1", {
         if self.player == nil or not player_online then
             self.object:remove()
         end
+        local extent = schemlib.get_selection(core.get_player_by_name(self.player))
+        if not extent or not extent.pos1 then
+            self.object:remove()
+        end
+    end,
+    on_deactivate = function(self)
+        local player_online = false
+        for _, player in ipairs(core.get_connected_players()) do
+            if player:get_player_name() == self.player then
+                player_online = true
+                break
+            end
+        end
+        if self.player == nil or not player_online then
+            self.object:remove()
+        end
+    end,
+    on_step = function(self, dtime)
+        local player_online = false
+        for _, player in ipairs(core.get_connected_players()) do
+            if player:get_player_name() == self.player then
+                player_online = true
+                break
+            end
+        end
+        if self.player == nil or not player_online then
+            self.object:remove()
+        end
     end,
     get_staticdata = function(self)
         if self.player ~= nil then
@@ -151,6 +179,34 @@ core.register_entity("schemlib:pos2", {
                 self.player = data[1]
             end
         end
+        local player_online = false
+        for _, player in ipairs(core.get_connected_players()) do
+            if player:get_player_name() == self.player then
+                player_online = true
+                break
+            end
+        end
+        if self.player == nil or not player_online then
+            self.object:remove()
+        end
+        local extent = schemlib.get_selection(core.get_player_by_name(self.player))
+        if not extent or not extent.pos2 then
+            self.object:remove()
+        end
+    end,
+        on_deactivate = function(self)
+        local player_online = false
+        for _, player in ipairs(core.get_connected_players()) do
+            if player:get_player_name() == self.player then
+                player_online = true
+                break
+            end
+        end
+        if self.player == nil or not player_online then
+            self.object:remove()
+        end
+    end,
+    on_step = function(self, dtime)
         local player_online = false
         for _, player in ipairs(core.get_connected_players()) do
             if player:get_player_name() == self.player then
@@ -210,6 +266,12 @@ core.register_entity("schemlib:cuboid", {
         end
         if self.player == nil or not player_online or self.pos1 == nil or self.pos2 == nil then
             self.object:remove()
+            return
+        end
+        local extent = schemlib.get_selection(core.get_player_by_name(self.player))
+        if not extent or not extent.pos1 or not extent.pos2 then
+            self.object:remove()
+            return
         end
         -- calculate the size of the cuboid based on the two positions
         local size = vector.add(vector.new(
@@ -222,6 +284,30 @@ core.register_entity("schemlib:cuboid", {
         })
 
 
+    end,
+        on_deactivate = function(self)
+        local player_online = false
+        for _, player in ipairs(core.get_connected_players()) do
+            if player:get_player_name() == self.player then
+                player_online = true
+                break
+            end
+        end
+        if self.player == nil or not player_online then
+            self.object:remove()
+        end
+    end,
+    on_step = function(self, dtime)
+        local player_online = false
+        for _, player in ipairs(core.get_connected_players()) do
+            if player:get_player_name() == self.player then
+                player_online = true
+                break
+            end
+        end
+        if self.player == nil or not player_online then
+            self.object:remove()
+        end
     end,
     get_staticdata = function(self)
         if self.player ~= nil and self.pos1 ~= nil and self.pos2 ~= nil then
@@ -395,6 +481,17 @@ core.register_chatcommand("load_schematic", {
         return true, "Schematic " .. schem_name .. ".mtx loaded"
     end,
 })
+
+
+
+core.register_on_leaveplayer(function(ObjectRef, timed_out)
+    schemlib.clear_selection(ObjectRef)
+end)
+
+
+core.register_on_shutdown(function()
+    schemlib.clear_selections()
+end)
 
 
 

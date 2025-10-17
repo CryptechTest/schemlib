@@ -369,3 +369,50 @@ function schemlib.get_dimensions(schem_name)
     end
     return nil
 end
+
+function schemlib.clear_selections()
+   for name, extent in pairs(extents) do
+        if not extent then
+            return
+        end
+        if extent.pos1 then
+            for obj in core.objects_inside_radius(tmp.pos1, 1) do
+                if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:pos1" then
+                    if obj:get_luaentity():get_staticdata() == name then
+                        obj:remove()
+                    end
+                end
+            end
+        end
+        if extent.pos2 then
+            for obj in core.objects_inside_radius(tmp.pos2, 1) do
+                if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:pos2" then
+                    if obj:get_luaentity():get_staticdata() == name then
+                        obj:remove()
+                    end
+                end
+            end
+        end
+        if extent.pos1 and extent.pos2 then
+            local min = vector.new(
+                math.min(tmp.pos1.x, tmp.pos2.x),
+                math.min(tmp.pos1.y, tmp.pos2.y),
+                math.min(tmp.pos1.z, tmp.pos2.z)
+            )
+            local max = vector.new(
+                math.max(tmp.pos1.x, tmp.pos2.x),
+                math.max(tmp.pos1.y, tmp.pos2.y),
+                math.max(tmp.pos1.z, tmp.pos2.z)
+            )
+            for obj in core.objects_in_area(min, max) do
+                if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:cuboid" then
+                    local data = obj:get_luaentity():get_staticdata()
+                    if data:split(";")[1] == name then
+                        obj:remove()
+                    end
+                end
+            end
+        end
+    end
+    extents = {}
+end
