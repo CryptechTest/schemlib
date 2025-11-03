@@ -51,7 +51,7 @@ function schemlib.serialize(pos1, pos2, flags)
         y = 0,
         z = 0
     }
-    local count = 0
+    local count = 1
     local result = {}
     while pos.x <= pos2.x do
         pos.y = pos1.y
@@ -133,7 +133,11 @@ end
 function schemlib.serialize_json(head, flags, pos1, pos2)
     local result, count = schemlib.serialize(pos1, pos2, flags)
     -- Serialize entries
-    local json_result = core.write_json(result)
+    local json_result, error = core.write_json(result)
+    if json_result == nil then
+        core.log("error", "schemlib.serialize_json: Failed to serialize result to JSON: " .. error)
+        return {}, 0
+    end
     head.size = schemlib.size(pos1, pos2)
     head.volume = schemlib.volume(pos1, pos2)
     local json_header = schemlib.get_serialized_header(head, count)

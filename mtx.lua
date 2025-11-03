@@ -5,7 +5,7 @@ local SERIALIZATION_TYPE = "\"type\":" .. "\"schematic.ctg\""
 
 function schemlib.get_serialized_header(head, count)
     local timestamp = "\"timestamp\":" .. os.time()
-    local count = "\"count\":" .. count
+    count = "\"count\":" .. count
     local offset = "\"offset\":" .. core.write_json(head.offset)
     local origin = "\"origin\":{}"
     if (head.origin) then

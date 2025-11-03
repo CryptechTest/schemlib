@@ -135,7 +135,8 @@ function schemlib.set_pos1(player, pos)
         if tmp.pos2 then
             local middle = vector.divide(vector.add(tmp.pos1, tmp.pos2), 2)
             core.add_entity(middle, "schemlib:cuboid", player:get_player_name() .. ";" .. core.pos_to_string(tmp.pos1) .. ";" .. core.pos_to_string(tmp.pos2))
-            core.chat_send_player(name, "Region selected from " .. core.pos_to_string(tmp.pos1) .. " to " .. core.pos_to_string(tmp.pos2))
+            local volume = schemlib.volume(tmp.pos1, tmp.pos2)
+            core.chat_send_player(name, "Region selected from " .. core.pos_to_string(tmp.pos1) .. " to " .. core.pos_to_string(tmp.pos2) .. " with volume " .. volume)
         end
     else
         core.chat_send_player(name, "Position 1 cleared")
@@ -186,7 +187,8 @@ function schemlib.set_pos2(player, pos)
         if tmp.pos1 then
             local middle = vector.divide(vector.add(tmp.pos1, tmp.pos2), 2)
             core.add_entity(middle, "schemlib:cuboid", player:get_player_name() .. ";" .. core.pos_to_string(tmp.pos1) .. ";" .. core.pos_to_string(tmp.pos2))
-            core.chat_send_player(name, "Region selected from " .. core.pos_to_string(tmp.pos1) .. " to " .. core.pos_to_string(tmp.pos2))
+            local volume = schemlib.volume(tmp.pos1, tmp.pos2)
+            core.chat_send_player(name, "Region selected from " .. core.pos_to_string(tmp.pos1) .. " to " .. core.pos_to_string(tmp.pos2) .. " with volume " .. volume)
         end
 
     else
@@ -376,7 +378,7 @@ function schemlib.clear_selections()
             return
         end
         if extent.pos1 then
-            for obj in core.objects_inside_radius(tmp.pos1, 1) do
+            for obj in core.objects_inside_radius(extent.pos1, 1) do
                 if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:pos1" then
                     if obj:get_luaentity():get_staticdata() == name then
                         obj:remove()
@@ -385,7 +387,7 @@ function schemlib.clear_selections()
             end
         end
         if extent.pos2 then
-            for obj in core.objects_inside_radius(tmp.pos2, 1) do
+            for obj in core.objects_inside_radius(extent.pos2, 1) do
                 if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:pos2" then
                     if obj:get_luaentity():get_staticdata() == name then
                         obj:remove()
@@ -395,14 +397,14 @@ function schemlib.clear_selections()
         end
         if extent.pos1 and extent.pos2 then
             local min = vector.new(
-                math.min(tmp.pos1.x, tmp.pos2.x),
-                math.min(tmp.pos1.y, tmp.pos2.y),
-                math.min(tmp.pos1.z, tmp.pos2.z)
+                math.min(extent.pos1.x, extent.pos2.x),
+                math.min(extent.pos1.y, extent.pos2.y),
+                math.min(extent.pos1.z, extent.pos2.z)
             )
             local max = vector.new(
-                math.max(tmp.pos1.x, tmp.pos2.x),
-                math.max(tmp.pos1.y, tmp.pos2.y),
-                math.max(tmp.pos1.z, tmp.pos2.z)
+                math.max(extent.pos1.x, extent.pos2.x),
+                math.max(extent.pos1.y, extent.pos2.y),
+                math.max(extent.pos1.z, extent.pos2.z)
             )
             for obj in core.objects_in_area(min, max) do
                 if obj:get_luaentity() ~= nil and obj:get_luaentity().name == "schemlib:cuboid" then

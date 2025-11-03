@@ -27,12 +27,12 @@ end
 --- Determines the volume of the region defined by positions `pos1` and `pos2`.
 -- @return The volume.
 function schemlib.volume(pos1, pos2)
-    local pos1, pos2 = schemlib.sort_pos(pos1, pos2)
+    pos1, pos2 = schemlib.sort_pos(pos1, pos2)
     return (pos2.x - pos1.x + 1) * (pos2.y - pos1.y + 1) * (pos2.z - pos1.z + 1)
 end
 
 function schemlib.size(pos1, pos2)
-    local pos1, pos2 = schemlib.sort_pos(pos1, pos2)
+    pos1, pos2 = schemlib.sort_pos(pos1, pos2)
     local w = (pos2.x - pos1.x + 1)
     local h = (pos2.y - pos1.y + 1)
     local l = (pos2.z - pos1.z + 1)
