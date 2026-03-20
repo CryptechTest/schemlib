@@ -18,6 +18,11 @@ if not exists then
     core.log("action", "[schemlib] Created schemlib directory")
 end
 
+-- schemlib compatibility layer...
+schemlib.mapping = dofile(core.get_modpath("schemlib").."/compat/mapping.lua")
+schemlib.node = dofile(core.get_modpath("schemlib").."/compat/node.lua")
+schemlib.plan = dofile(core.get_modpath("schemlib").."/compat/plan.lua")
+schemlib.plan_manager = dofile(core.get_modpath("schemlib").."/compat/plan_manager.lua")
 
 core.register_craftitem("schemlib:wand", {
     description = "Schematic Wand",
